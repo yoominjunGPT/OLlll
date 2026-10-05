@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#f7f7fb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Focus Study">
+<title>Focus Study</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f6f6fb;--card:#fff;--ink:#171827;--muted:#85879a;--purple:#6258e8;--purple2:#8478ff;--line:#ececf3;--green:#27b37e;--orange:#ff9d45;--red:#df4e64;--shadow:0 10px 30px rgba(44,39,92,.08)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Apple SD Gothic Neo",sans-serif}
+button,input,select{font:inherit}.app{max-width:500px;margin:auto;min-height:100vh;padding:env(safe-area-inset-top) 18px calc(94px + env(safe-area-inset-bottom))}
+.hidden{display:none!important}.center{text-align:center}
+header{padding:18px 2px 14px;display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;gap:10px}.miniIcon{width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#182a50,#7667ee);display:grid;place-items:center;box-shadow:0 5px 14px #6258e833}.miniIcon span{font-size:21px}.brand{font-weight:800;font-size:19px}
+.iconBtn{border:0;background:#fff;border-radius:13px;width:42px;height:42px}
+.hero{background:linear-gradient(145deg,#151d38,#333a6b);color:white;border-radius:28px;padding:22px;box-shadow:0 16px 32px #29255c22}.eyebrow{color:#c7c3ff;font-size:13px;font-weight:700}.hero h2{margin:8px 0 4px;font-size:24px}.hero p{margin:0;color:#c9ccdc;font-size:13px}
+.goal{margin-top:18px;background:#ffffff18;border:1px solid #ffffff20;border-radius:18px;padding:14px}.goalrow{display:flex;justify-content:space-between;font-size:13px}.goal b{font-size:22px}.track{height:8px;background:#ffffff22;border-radius:9px;margin-top:10px;overflow:hidden}.fill{height:100%;width:0;background:#9d91ff;border-radius:9px;transition:width .35s}
+.btn{border:0;width:100%;padding:15px;border-radius:18px;font-size:16px;font-weight:800;cursor:pointer}.primary{background:linear-gradient(135deg,var(--purple),var(--purple2));color:white;box-shadow:0 10px 20px #6258e833}.secondary{background:#ecebff;color:#4c43bd}.danger{background:#fdecef;color:#a72e43}.ghost{background:#f3f3f7;color:#4b4d5c;box-shadow:none}
+.hero .btn{margin-top:15px}.section{margin-top:20px}.sectionHead{display:flex;justify-content:space-between;align-items:center;margin:0 2px 10px}.sectionHead h3,.sectionHead h2{margin:0}.sectionHead span{font-size:12px;color:var(--muted)}
+.card{background:var(--card);border-radius:22px;padding:17px;box-shadow:var(--shadow);border:1px solid #eeeef5}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{padding:14px;background:#f8f8fc;border-radius:17px}.stat small{color:var(--muted)}.stat b{display:block;font-size:21px;margin-top:5px}
+.xpTop{display:flex;justify-content:space-between;align-items:end}.levelBadge{font-weight:900;color:var(--purple);font-size:14px}.xpValue{font-size:13px;color:var(--muted)}.xpTrack{height:10px;background:#ecebf7;border-radius:999px;overflow:hidden;margin-top:10px}.xpFill{height:100%;background:linear-gradient(90deg,#6258e8,#9a8fff);width:0;transition:width .35s}
+.row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.left{display:flex;gap:11px;align-items:center}.dot{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:#eeeefe}.row small{color:var(--muted);display:block;margin-top:2px}.score{font-weight:800;color:var(--purple);text-align:right}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(500px,100%);padding:9px 10px calc(9px + env(safe-area-inset-bottom));background:#ffffffee;backdrop-filter:blur(18px);border-top:1px solid #e9e9f0;display:flex;justify-content:space-around;z-index:10}
+nav button{border:0;background:none;color:#a0a2b1;font-size:11px;font-weight:700;display:flex;flex-direction:column;gap:4px;align-items:center}nav button.active{color:var(--purple)}nav .ico{font-size:20px}
+.view{display:none}.view.active{display:block}
+.auth{min-height:calc(100vh - 28px);display:flex;align-items:center;justify-content:center}.authCard{width:100%;background:#fff;border-radius:30px;padding:24px;box-shadow:0 18px 50px rgba(44,39,92,.12)}.authLogo{width:76px;height:76px;border-radius:24px;margin:0 auto 14px;background:linear-gradient(145deg,#182a50,#7667ee);display:grid;place-items:center;font-size:36px}.auth h1{text-align:center;margin:5px 0}.auth p{text-align:center;color:var(--muted);font-size:13px}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#f4f4f8;padding:4px;border-radius:15px;margin:20px 0}.tab{border:0;background:transparent;padding:11px;border-radius:12px;color:var(--muted);font-weight:800}.tab.sel{background:white;color:var(--purple);box-shadow:0 3px 9px #33333310}.label{font-size:12px;color:var(--muted);margin:13px 0 7px}input,.select{width:100%;padding:14px;border:1px solid #e1e1ea;border-radius:15px;background:#fbfbfd;color:var(--ink);outline:none}input:focus,.select:focus{border-color:#8d84f1}.hint{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.45}
+.formDark{background:#151d38;color:white;border-radius:26px;padding:20px}.formDark .label{color:#bfc4d7}.formDark input,.formDark .select{background:#10162b;border-color:#3c4666;color:white}
+.top{display:flex;align-items:center;margin:4px 0 14px}.back{border:0;background:none;font-size:28px;width:38px}.topTitle{text-align:center;font-weight:800;flex:1}
+.groupCard{border:1px solid #ecebf4;background:#fafafd;border-radius:18px;padding:14px;margin-bottom:10px}.groupTop{display:flex;justify-content:space-between;align-items:center}.groupCode{font-family:ui-monospace,Menlo,monospace;letter-spacing:2px;font-weight:900;color:var(--purple)}.leader{display:grid;grid-template-columns:28px 1fr auto;gap:9px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}.leader:last-child{border-bottom:0}.rank{font-weight:900;color:#77798a}.avatar{width:32px;height:32px;border-radius:11px;background:#eeeefe;display:grid;place-items:center;font-weight:900;color:#5b55c9}.leader strong{font-size:14px}.leader small{color:var(--muted);display:block;font-size:11px;margin-top:2px}.leaderXP{font-weight:900;color:var(--purple);font-size:14px;text-align:right}.pill{display:inline-block;padding:7px 10px;border-radius:999px;background:#efeff8;color:#67697b;font-size:11px;font-weight:800}.me{background:#f0efff;border-color:#d8d3ff}
+.focusScreen{background:linear-gradient(180deg,#10182d,#171b39);min-height:calc(100vh - 30px);color:white;border-radius:30px;padding:20px;text-align:center}.lock{display:inline-block;background:#ffffff13;border:1px solid #ffffff20;padding:8px 14px;border-radius:999px;font-size:12px}.focusScreen h2{margin:20px 0 4px}.focusScreen p{color:#aeb5cc}.ring{width:235px;height:235px;border-radius:50%;margin:28px auto;display:grid;place-items:center;background:conic-gradient(#8b7fff 0deg,#6258e8 250deg,#26314f 250deg);position:relative}.ring:after{content:"";position:absolute;inset:10px;background:#11182f;border-radius:50%}.ringIn{position:relative;z-index:1}.time{font-size:49px;font-weight:800;letter-spacing:-2px}.ring small{color:#aeb5cc}.focusStats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.focusStats div{background:#ffffff10;border:1px solid #ffffff12;border-radius:17px;padding:13px}.focusStats b{display:block;font-size:20px;margin-top:4px}.warning{background:#302713;color:#ffd98a;border:1px solid #806b37;border-radius:18px;padding:13px;margin-top:12px;font-size:13px}
+.complete{text-align:center}.check{width:86px;height:86px;border-radius:50%;background:#8be4bf;color:#075b3d;font-size:45px;display:grid;place-items:center;margin:10px auto 20px}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(20px);background:#171827;color:#fff;padding:13px 17px;border-radius:14px;opacity:0;pointer-events:none;transition:.25s;z-index:30;font-size:13px}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.xpPopup{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 22px);transform:translate(-50%,-20px);z-index:40;background:#171827;color:#fff;padding:14px 18px;border-radius:18px;box-shadow:0 12px 35px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.3s;text-align:center;min-width:200px}.xpPopup.show{opacity:1;transform:translate(-50%,0)}.xpPopup .gain{font-size:22px;font-weight:900;color:#a99fff}.xpPopup .msg{font-size:12px;color:#cdd0df;margin-top:3px}
+
+/* v5: game-style group competition */
+.podium{display:grid;grid-template-columns:1fr 1.16fr 1fr;gap:8px;align-items:end;margin-top:14px}
+.pod{background:#f8f8fc;border:1px solid #ededf4;border-radius:18px;padding:12px 7px;text-align:center;min-height:112px}
+.pod.first{min-height:138px;background:linear-gradient(180deg,#f3f0ff,#fff);border-color:#dcd7ff}
+.pod .medal{font-size:27px}.pod .podRank{font-size:11px;color:var(--muted);margin-top:3px}
+.pod strong{display:block;font-size:12px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pod .podXP{font-size:15px;color:var(--purple);font-weight:900;margin-top:6px}
+.week{display:flex;align-items:center;justify-content:space-between;background:#f6f5ff;border:1px solid #e6e3ff;padding:11px 13px;border-radius:15px;margin-bottom:12px}
+.week b{color:var(--purple)}
+.inviteBox{background:#151d38;color:white;border-radius:20px;padding:15px;margin-top:12px}
+.inviteUrl{font-size:11px;color:#c7c9d9;word-break:break-all;line-height:1.4;margin-top:7px}
+.shareBtn{margin-top:10px!important;background:#fff;color:#4d46c0;box-shadow:none!important}
+.myRank{margin-top:12px;padding:11px 13px;border-radius:15px;background:#f2efff;color:#554dc3;font-weight:800;text-align:center;font-size:13px}
+.syncDot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:6px}
+
+.rank10{margin-top:14px}.rank10 .leader{padding:12px 9px;border-radius:14px;margin-bottom:7px;background:#fafafd;border:1px solid #ededf4}.rank10 .leader.me{background:#f0efff;border-color:#d8d3ff}
+.rewardCard{margin-top:14px;background:linear-gradient(135deg,#fff8e8,#fff);border:1px solid #f4dfad;border-radius:20px;padding:15px}
+.rewardTop{display:flex;justify-content:space-between;align-items:center}.coin{color:#b97913;font-weight:900}.rewardLine{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px}.rewardBadge{font-weight:900;color:#9d6a12}
+.claimed{background:#eef8f3!important;color:#207956!important;border-color:#cbeedd!important}
+.coins{display:inline-flex;align-items:center;gap:5px;background:#fff5d9;border:1px solid #f3dfa8;border-radius:999px;padding:7px 10px;color:#9a6810;font-weight:900;font-size:12px}
+.smallButton{border:0;border-radius:12px;padding:9px 11px;font-size:12px;font-weight:800}
+</style>
+</head>
+<body>
+<div id="auth" class="app auth">
+  <div class="authCard">
+    <div class="authLogo">🌱</div>
+    <h1>Focus Study</h1><p>집중하고, 함께 성장해요.</p>
+    <div class="tabs"><button class="tab sel" id="loginTab" onclick="switchAuth('login')">로그인</button><button class="tab" id="signupTab" onclick="switchAuth('signup')">회원가입</button></div>
+    <div id="loginForm">
+      <div class="label">이메일</div><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com">
+      <div class="label">비밀번호</div><input id="loginPw" type="password" autocomplete="current-password" placeholder="비밀번호">
+      <button class="btn primary" style="margin-top:16px" onclick="login()">로그인</button>
+    </div>
+    <div id="signupForm" class="hidden">
+      <div class="label">닉네임</div><input id="signupName" maxlength="20" placeholder="예: 집중하는학생">
+      <div class="label">이메일</div><input id="signupEmail" type="email" autocomplete="email" placeholder="you@example.com">
+      <div class="label">비밀번호</div><input id="signupPw" type="password" autocomplete="new-password" placeholder="8자 이상 권장">
+      <div class="hint">친구들과 경쟁할 때 사용할 닉네임을 입력하세요. 실명 대신 닉네임을 사용하는 것을 권장합니다.</div>
+      <button class="btn primary" style="margin-top:16px" onclick="signup()">계정 만들기</button>
+    </div>
+    <div id="configNotice" class="hint" style="margin-top:16px;text-align:center">클라우드 로그인은 아래 안내의 Supabase 설정이 필요합니다.</div>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+<header><div class="logo"><div class="miniIcon"><span>🌱</span></div><div class="brand">Focus Study</div></div><button class="iconBtn" onclick="logout()">↪️</button></header>
+
+<div id="home" class="view active">
+  <div class="hero"><div class="eyebrow">🌱 오늘도 조금씩 성장해요</div><h2 id="greet">집중하는 순간,<br>가장 빛나는 나에게</h2><p id="greetSub">작은 집중이 더 나은 내일을 만듭니다.</p>
+    <div class="goal"><div class="goalrow"><span>오늘의 목표</span><span>오늘의 집중</span></div><div class="goalrow"><b>2시간</b><b id="todayMin">0분</b></div><div class="track"><div id="goalFill" class="fill"></div></div></div>
+    <button class="btn primary" onclick="show('start')">▶ 공부 시작하기</button>
+  </div>
+  <div class="section"><div class="stats"><div class="stat"><small>🔥 연속 공부</small><b id="streak">0일</b></div><div class="stat"><small>🎯 내 XP</small><b id="xpHome">0 XP</b></div></div></div>
+  <div class="section"><div class="card"><div class="xpTop"><div><div id="levelHome" class="levelBadge">Lv.1 집중하는 새싹</div><div style="margin-top:5px;font-weight:800">다음 레벨까지</div></div><div class="xpValue"><b id="xpHave">0</b> / <b id="xpNeed">100</b> XP</div></div><div class="xpTrack"><div id="xpFill" class="xpFill"></div></div></div></div>
+  <div class="section"><div class="sectionHead"><h3>최근 기록</h3><span>내 기록</span></div><div class="card" id="history"></div></div>
+</div>
+
+<div id="start" class="view"><div class="top"><button class="back" onclick="show('home')">‹</button><div class="topTitle">공부 시작하기</div><div style="width:38px"></div></div>
+  <div class="formDark">
+    <div class="label">과목</div><select id="subject" class="select"><option>수학</option><option>영어</option><option>국어</option><option>과학</option><option>사회</option><option>기타</option></select>
+    <div class="label">공부할 내용</div><input id="topic" placeholder="예: 이차방정식 복습">
+    <div class="label">목표 시간</div><select id="minutes" class="select"><option value="10">10분</option><option value="20">20분</option><option value="25" selected>25분</option><option value="30">30분</option><option value="40">40분</option><option value="50">50분</option><option value="60">60분</option></select>
+    <div class="label">경쟁에 기록할 그룹</div><select id="groupSelect" class="select"><option value="">개인 공부로 기록</option></select>
+    <button class="btn primary" style="margin-top:18px" onclick="startFocus()">▶ 집중 시작</button>
+  </div>
+</div>
+
+<div id="focus" class="view"><div class="focusScreen"><div class="lock">🔒 집중 모드</div><h2 id="fsubject">수학</h2><p id="ftopic">집중 중</p>
+  <div class="ring"><div class="ringIn"><div id="timer" class="time">25:00</div><small>남은 시간</small></div></div>
+  <div class="focusStats"><div>📱 이탈 횟수<b id="exits">0회</b></div><div>🔥 집중도<b id="focusScore">100점</b></div></div>
+  <div id="warning" class="warning hidden">⚠️ 다른 화면으로 이동했습니다. 다시 집중을 이어가세요.</div>
+  <button id="pause" class="btn" style="background:#ffffff18;color:white;margin-top:18px" onclick="pauseFocus()">Ⅱ 일시정지</button>
+  <button class="btn" style="background:#7f2734;color:white" onclick="stopFocus()">공부 종료</button>
+</div></div>
+
+<div id="complete" class="view"><div class="card complete" style="margin-top:35px;padding:30px 20px"><div class="check">✓</div><h1 style="font-size:28px">공부 완료!</h1><p id="completeText" style="color:var(--muted)">집중을 완료했습니다.</p><div class="stats" style="margin:25px 0;text-align:left"><div class="stat"><small>공부한 시간</small><b id="doneMin">0분</b></div><div class="stat"><small>획득 XP</small><b id="doneXP">+0</b></div></div><button class="btn primary" onclick="show('home')">확인</button></div></div>
+
+<div id="groups" class="view"><div class="sectionHead" style="margin-top:10px"><h2>스터디 그룹</h2><span>함께 경쟁해요</span></div>
+  <div class="card">
+    <div style="font-weight:800">새 그룹 만들기</div><div class="label">그룹 이름</div><input id="newGroupName" maxlength="30" placeholder="예: 우리 반 집중 챌린지"><button class="btn primary" onclick="createGroup()">그룹 만들기</button>
+    <div style="height:1px;background:var(--line);margin:20px 0"></div>
+    <div style="font-weight:800">친구 그룹 참가</div><div class="label">초대 코드</div><input id="joinCode" maxlength="6" style="text-transform:uppercase;letter-spacing:2px" placeholder="6자리 코드"><button class="btn secondary" onclick="joinGroup()">그룹 참가</button>
+  </div>
+  <div class="section"><div class="sectionHead"><h3>내 그룹</h3><span id="groupCount">0개</span></div><div id="groupList"></div></div>
+</div>
+
+<div id="groupDetail" class="view"><div class="top"><button class="back" onclick="show('groups')">‹</button><div class="topTitle" id="detailTitle">그룹</div><div style="width:38px"></div></div>
+  <div class="card">
+    <div class="groupTop"><div><div class="pill">공유 초대 코드</div><div id="detailCode" class="groupCode" style="margin-top:8px;font-size:24px">------</div></div><button class="btn secondary" style="width:auto;padding:11px 13px" onclick="copyCode()">복사</button></div>
+    <div class="inviteBox"><div style="font-weight:800">친구 초대 링크</div><div id="inviteUrl" class="inviteUrl">그룹을 연 뒤 초대 링크가 표시됩니다.</div><button class="btn shareBtn" onclick="shareInvite()">↗ 초대 링크 공유</button></div>
+    <div style="margin-top:18px">
+      <div class="week"><span>이번 주 경쟁</span><b id="weekLabel">-</b></div>
+      <div id="podium" class="podium"></div>
+      <div id="myRank" class="myRank hidden"></div>
+
+      <div class="rewardCard">
+        <div class="rewardTop"><div><b>🏅 지난 주 보상</b><div class="hint" style="margin-top:4px">주가 끝난 뒤 최종 순위에 따라 한 번 받을 수 있어요.</div></div><div class="coin">🪙 코인</div></div>
+        <div id="rewardLines"></div>
+        <button id="claimRewardBtn" class="btn secondary" style="margin-top:10px" onclick="claimReward()">🎁 지난 주 보상 받기</button>
+      </div>
+
+      <div style="margin-top:18px">
+        <div class="sectionHead"><h3>TOP 10</h3><span><span class="syncDot"></span>자동 새로고침</span></div>
+        <div id="leaderboard" class="rank10"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="records" class="view"><div class="sectionHead" style="margin-top:10px"><h2>내 기록</h2><span>클라우드 저장</span></div><div class="card" id="allHistory"></div></div>
+<div id="profile" class="view"><div class="sectionHead" style="margin-top:10px"><h2>내 프로필</h2><span>계정</span></div><div class="card"><div style="display:flex;gap:13px;align-items:center"><div class="miniIcon" style="width:58px;height:58px"><span>🌱</span></div><div><div id="profileName" style="font-weight:900;font-size:18px">-</div><div id="profileEmail" style="color:var(--muted);font-size:12px">-</div></div></div><div class="section" style="margin-top:16px"><div class="stats"><div class="stat"><small>레벨</small><b id="profileLevel">Lv.1</b></div><div class="stat"><small>누적 집중</small><b id="profileMinutes">0분</b></div></div></div></div></div>
+
+<nav><button class="active" data-v="home" onclick="show('home')"><span class="ico">⌂</span>홈</button><button data-v="groups" onclick="show('groups')"><span class="ico">♧</span>그룹</button><button data-v="records" onclick="show('records')"><span class="ico">▣</span>기록</button><button data-v="profile" onclick="show('profile')"><span class="ico">♙</span>프로필</button></nav>
+<div id="toast" class="toast"></div><div id="xpPopup" class="xpPopup"><div id="xpGain" class="gain">+0 XP</div><div id="xpMsg" class="msg">집중 완료!</div></div>
+</div>
+
+<script>
+const SUPABASE_URL = "PASTE_YOUR_SUPABASE_URL";
+const SUPABASE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY";
+const CONFIGURED = !SUPABASE_URL.startsWith("PASTE_") && !SUPABASE_KEY.startsWith("PASTE_");
+const sb = CONFIGURED ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:true,autoRefreshToken:true}}) : null;
+
+let currentUser=null, profile=null, groups=[], currentGroup=null;
+let timerState={active:false,paused:false,total:0,left:0,exits:0,id:null,subject:'',topic:'',groupId:null};
+
+const LEVELS=[
+  {min:0,title:'집중하는 새싹'},{min:100,title:'꾸준한 학습자'},{min:250,title:'집중 훈련생'},
+  {min:450,title:'몰입하는 학생'},{min:700,title:'집중 마스터'},{min:1000,title:'공부 챔피언'},
+  {min:1400,title:'몰입의 달인'},{min:1900,title:'집중 레전드'}
+];
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
+function popup(x,msg){const p=document.getElementById('xpPopup');document.getElementById('xpGain').textContent='+'+x+' XP';document.getElementById('xpMsg').textContent=msg;p.classList.add('show');setTimeout(()=>p.classList.remove('show'),2500)}
+function xpForLevel(l){return Math.round(100+(l-1)*40)}
+function levelFromTotal(total){let level=1,remain=total;for(let i=1;i<LEVELS.length;i++){const need=xpForLevel(i);if(remain<need)break;remain-=need;level=i+1}return {level,cur:remain,need:level<LEVELS.length?xpForLevel(level):1,pct:level===LEVELS.length?100:Math.min(100,remain/xpForLevel(level)*100)}}
+function todayKey(){return new Date().toISOString().slice(0,10)}
+function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.v===id));if(id==='groups')loadGroups();if(id==='records')loadMySessions();renderUser()}
+function switchAuth(mode){document.getElementById('loginForm').classList.toggle('hidden',mode!=='login');document.getElementById('signupForm').classList.toggle('hidden',mode!=='signup');document.getElementById('loginTab').classList.toggle('sel',mode==='login');document.getElementById('signupTab').classList.toggle('sel',mode==='signup')}
+function setAuthError(msg){toast(msg)}
+async function signup(){
+  if(!CONFIGURED)return toast('Supabase 설정 후 회원가입할 수 있어요.');
+  const nickname=document.getElementById('signupName').value.trim(),email=document.getElementById('signupEmail').value.trim(),password=document.getElementById('signupPw').value;
+  if(nickname.length<2)return toast('닉네임을 2자 이상 입력해주세요.');
+  if(password.length<6)return toast('비밀번호를 6자 이상 입력해주세요.');
+  const {data,error}=await sb.auth.signUp({email,password,options:{data:{nickname}}});
+  if(error)return setAuthError(error.message);
+  if(data.session){await afterLogin(data.user);toast('계정이 만들어졌어요!')}
+  else toast('인증 메일이 필요할 수 있어요. 메일을 확인한 뒤 로그인해주세요.');
+}
+async function login(){
+  if(!CONFIGURED)return toast('Supabase 설정 후 로그인할 수 있어요.');
+  const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPw').value;
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error)return setAuthError(error.message);
+  await afterLogin(data.user);
+}
+async function logout(){if(sb)await sb.auth.signOut();currentUser=null;profile=null;groups=[];document.getElementById('app').classList.add('hidden');document.getElementById('auth').classList.remove('hidden');}
+async function afterLogin(user){
+  currentUser=user;
+  await ensureProfile();
+  document.getElementById('auth').classList.add('hidden');document.getElementById('app').classList.remove('hidden');show('home');
+  await loadMySessions();await loadMyProfileCoins();await loadGroups();await joinPendingInvite();
+}
+async function ensureProfile(){
+  let {data,error}=await sb.from('profiles').select('id,nickname').eq('id',currentUser.id).maybeSingle();
+  if(error){toast(error.message);return}
+  if(!data){
+    const nickname=(currentUser.user_metadata?.nickname||'집중하는 학생').slice(0,20);
+    const r=await sb.from('profiles').insert({id:currentUser.id,nickname}).select().single();if(r.error)toast(r.error.message);else profile=r.data;
+  }else profile=data;
+}
+function subjectIcon(s){return s==='수학'?'∑':s==='영어'?'Aa':s==='과학'?'⚛':'📚'}
+
+async function loadMyProfileCoins(){
+  if(!currentUser)return;
+  const {data,error}=await sb.from('profiles').select('nickname,focus_coins').eq('id',currentUser.id).maybeSingle();
+  if(!error&&data){
+    if(profile) profile.nickname=data.nickname;
+    document.getElementById('profileName').textContent=data.nickname||'집중하는 학생';
+    document.getElementById('profileCoins').textContent=data.focus_coins||0;
+  }
+}
+
+async function loadMySessions(){
+  if(!currentUser)return;
+  const {data,error}=await sb.from('study_sessions').select('id,subject,topic,minutes,xp,score,exits,created_at,group_id').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(50);
+  if(error){toast(error.message);return}
+  const rows=data||[];
+  let today=rows.filter(x=>x.created_at.slice(0,10)===todayKey()),todayMin=today.reduce((a,x)=>a+x.minutes,0);
+  document.getElementById('todayMin').textContent=todayMin+'분';document.getElementById('goalFill').style.width=Math.min(100,todayMin/120*100)+'%';
+  const totalXP=rows.reduce((a,x)=>a+x.xp,0),totalMin=rows.reduce((a,x)=>a+x.minutes,0);
+  const lv=levelFromTotal(totalXP);
+  document.getElementById('xpHome').textContent=totalXP+' XP';document.getElementById('levelHome').textContent=`Lv.${lv.level} ${LEVELS[lv.level-1].title}`;
+  document.getElementById('xpHave').textContent=lv.cur;document.getElementById('xpNeed').textContent=lv.level===LEVELS.length?'MAX':lv.need;document.getElementById('xpFill').style.width=lv.pct+'%';
+  document.getElementById('profileName').textContent=profile?.nickname||'집중하는 학생';document.getElementById('profileEmail').textContent=currentUser.email||'';
+  document.getElementById('profileLevel').textContent='Lv.'+lv.level;document.getElementById('profileMinutes').textContent=totalMin+'분';
+  const recent=rows.slice(0,7).map(x=>`<div class="row"><div class="left"><div class="dot">${subjectIcon(x.subject)}</div><div><b>${x.subject}</b><small>${esc(x.topic||'공부')} · ${x.minutes}분 · 이탈 ${x.exits}회</small></div></div><div class="score">${x.xp} XP<br><small>${x.score}점</small></div></div>`).join('');
+  document.getElementById('history').innerHTML=recent||'<div style="color:var(--muted);text-align:center;padding:12px">아직 공부 기록이 없습니다.</div>';
+  document.getElementById('allHistory').innerHTML=rows.map(x=>`<div class="row"><div class="left"><div class="dot">${subjectIcon(x.subject)}</div><div><b>${x.subject}</b><small>${esc(x.topic||'공부')} · ${new Date(x.created_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</small></div></div><div class="score">${x.minutes}분<br><small>${x.xp} XP</small></div></div>`).join('')||'<div style="color:var(--muted);text-align:center;padding:12px">아직 기록이 없습니다.</div>';
+  // streak
+  const days=[...new Set(rows.map(x=>x.created_at.slice(0,10)))];let s=0,d=new Date();while(days.includes(d.toISOString().slice(0,10))){s++;d.setDate(d.getDate()-1)}document.getElementById('streak').textContent=s+'일';
+}
+async function loadGroups(){
+  if(!currentUser)return;
+  const {data,error}=await sb.from('group_members').select('group_id,role,groups(id,name,code,owner_id)').eq('user_id',currentUser.id);
+  if(error){toast(error.message);return}
+  groups=(data||[]).map(x=>x.groups).filter(Boolean);renderGroups();populateGroupSelect();
+}
+function renderGroups(){document.getElementById('groupCount').textContent=groups.length+'개';document.getElementById('groupList').innerHTML=groups.length?groups.map(g=>`<div class="groupCard"><div class="groupTop"><div><b>${esc(g.name)}</b><div class="groupCode">${g.code}</div></div><button class="btn secondary" style="width:auto;padding:11px 13px" onclick='openGroup(${JSON.stringify(g)})'>랭킹 보기</button></div></div>`).join(''):'<div class="card" style="color:var(--muted);text-align:center">아직 참여한 그룹이 없습니다.</div>'}
+function populateGroupSelect(){document.getElementById('groupSelect').innerHTML='<option value="">개인 공부로 기록</option>'+groups.map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join('')}
+async function createGroup(){
+  const name=document.getElementById('newGroupName').value.trim();if(name.length<2)return toast('그룹 이름을 입력해주세요.');
+  const {data,error}=await sb.rpc('create_group',{p_name:name});if(error)return toast(error.message);
+  document.getElementById('newGroupName').value='';await loadGroups();toast(`그룹이 만들어졌어요! 초대 코드 ${data.code}`);openGroup(data);
+}
+async function joinGroup(){
+  const code=document.getElementById('joinCode').value.trim().toUpperCase();if(code.length!==6)return toast('6자리 초대 코드를 입력해주세요.');
+  const {data,error}=await sb.rpc('join_group',{p_code:code});if(error)return toast(error.message);
+  document.getElementById('joinCode').value='';await loadGroups();toast('그룹에 참가했습니다!');openGroup(data);
+}
+function openGroup(g){currentGroup=g;document.getElementById('detailTitle').textContent=g.name;document.getElementById('detailCode').textContent=g.code;document.getElementById('inviteUrl').textContent=makeInviteUrl(g.code);document.getElementById('weekLabel').textContent=getWeekRange().label;show('groupDetail');loadLeaderboard()}
+async function loadLeaderboard(){
+  if(!currentGroup)return;
+  const {data,error}=await sb.rpc('group_leaderboard',{p_group_id:currentGroup.id});
+  if(error){toast(error.message);return}
+  const rows=data||[];
+  const display=[rows[1],rows[0],rows[2]];
+  const medals=['🥈','🥇','🥉'];
+  document.getElementById('podium').innerHTML=display.map((r,i)=>{
+    if(!r)return '<div class="pod"></div>';
+    return `<div class="pod ${i===1?'first':''}">
+      <div class="medal">${medals[i]}</div>
+      <div class="podRank">${i===1?'1위':i===0?'2위':'3위'}</div>
+      <strong>${esc(r.nickname||'익명')}</strong>
+      <div class="podXP">${r.xp} XP</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px">${r.minutes}분</div>
+    </div>`;
+  }).join('');
+
+  const mine=rows.findIndex(r=>r.user_id===currentUser.id);
+  const me=document.getElementById('myRank');
+  if(mine>=0){
+    me.classList.remove('hidden');
+    me.textContent=`내 순위 ${mine+1}위 · ${rows[mine].xp} XP · ${rows[mine].minutes}분 · 보상 ${rewardForRank(mine+1)}🪙`;
+  } else me.classList.add('hidden');
+
+  const top10=rows.slice(0,10);
+  document.getElementById('leaderboard').innerHTML=top10.length?top10.map((r,i)=>{
+    const reward=rewardForRank(i+1);
+    return `<div class="leader ${r.user_id===currentUser.id?'me':''}">
+      <div class="rank">${i+1}</div>
+      <div class="left"><div class="avatar">${(r.nickname||'?').slice(0,1)}</div><div>
+        <strong>${esc(r.nickname||'익명')}</strong><small>${r.minutes}분 · ${r.sessions}회</small>
+      </div></div>
+      <div class="leaderXP">${r.xp} XP<div style="font-size:10px;color:#9a6810;margin-top:3px">+${reward}🪙</div></div>
+    </div>`;
+  }).join(''):'<div style="color:var(--muted);text-align:center;padding:14px">이번 주 기록이 아직 없습니다.</div>';
+
+  renderRewardPolicy();
+  updateClaimButton();
+}
+function rewardForRank(rank){
+  if(rank===1)return 300;
+  if(rank===2)return 200;
+  if(rank===3)return 150;
+  if(rank>=4 && rank<=10)return 50;
+  return 20;
+}
+function renderRewardPolicy(){
+  document.getElementById('rewardLines').innerHTML=
+    `<div class="rewardLine"><span>🥇 1위</span><span class="rewardBadge">+300🪙</span></div>`+
+    `<div class="rewardLine"><span>🥈 2위</span><span class="rewardBadge">+200🪙</span></div>`+
+    `<div class="rewardLine"><span>🥉 3위</span><span class="rewardBadge">+150🪙</span></div>`+
+    `<div class="rewardLine"><span>4~10위</span><span class="rewardBadge">+50🪙</span></div>`;
+}
+async function updateClaimButton(){
+  const b=document.getElementById('claimRewardBtn');
+  if(!currentGroup||!b)return;
+  const {data,error}=await sb.rpc('reward_status',{p_group_id:currentGroup.id});
+  if(error){b.textContent='🎁 지난 주 보상 받기';b.classList.remove('claimed');return}
+  if(!data || data.rank==null){
+    b.textContent='🎁 지난 주 보상 받기';
+    b.classList.remove('claimed');
+    b.disabled=true;
+    b.style.opacity='.55';
+  }else if(data.claimed){
+    b.textContent=`✅ ${data.reward_coins}🪙 보상 수령 완료`;
+    b.classList.add('claimed');b.disabled=true;b.style.opacity='1';
+  }else{
+    b.textContent=`🎁 ${data.reward_coins}🪙 지난 주 보상 받기`;
+    b.classList.remove('claimed');b.disabled=false;b.style.opacity='1';
+  }
+}
+async function claimReward(){
+  if(!currentGroup)return;
+  const b=document.getElementById('claimRewardBtn');b.disabled=true;
+  const {data,error}=await sb.rpc('claim_weekly_reward',{p_group_id:currentGroup.id});
+  if(error){b.disabled=false;toast(error.message);return}
+  toast(`지난 주 보상 +${data.reward_coins}🪙 획득!`);
+  await loadLeaderboard();
+  loadMyProfileCoins();
+}
+async function copyCode(){if(navigator.clipboard)await navigator.clipboard.writeText(currentGroup.code);toast('초대 코드를 복사했어요.')}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function updateTimer(){document.getElementById('timer').textContent=fmt(timerState.left);const score=Math.max(0,100-timerState.exits*8);document.getElementById('focusScore').textContent=score+'점';document.getElementById('exits').textContent=timerState.exits+'회'}
+function startFocus(){
+  timerState.subject=document.getElementById('subject').value;timerState.topic=document.getElementById('topic').value.trim();timerState.total=parseInt(document.getElementById('minutes').value)*60;timerState.left=timerState.total;timerState.exits=0;timerState.active=true;timerState.paused=false;timerState.groupId=document.getElementById('groupSelect').value||null;
+  document.getElementById('fsubject').textContent=timerState.subject;document.getElementById('ftopic').textContent=timerState.topic||'집중 중';document.getElementById('pause').textContent='Ⅱ 일시정지';document.getElementById('warning').classList.add('hidden');show('focus');updateTimer();
+  timerState.id=setInterval(()=>{if(!timerState.active||timerState.paused)return;timerState.left--;updateTimer();if(timerState.left<=0)finish(true)},1000)
+}
+function pauseFocus(){timerState.paused=!timerState.paused;document.getElementById('pause').textContent=timerState.paused?'▶ 다시 시작':'Ⅱ 일시정지'}
+async function finish(completed){
+  clearInterval(timerState.id);const used=Math.max(1,Math.round((timerState.total-timerState.left)/60)),score=Math.max(0,100-timerState.exits*8);
+  const xp=Math.max(5,used)+(completed?10:0)+Math.max(0,10-timerState.exits*2)+(used>=50?10:0);
+  const {error}=await sb.from('study_sessions').insert({user_id:currentUser.id,group_id:timerState.groupId,subject:timerState.subject,topic:timerState.topic,minutes:used,xp,score,exits:timerState.exits});
+  if(error){toast(error.message);return}
+  timerState.active=false;document.getElementById('doneMin').textContent=used+'분';document.getElementById('doneXP').textContent='+'+xp+' XP';document.getElementById('completeText').textContent=`${used}분 동안 ${timerState.subject}에 집중했습니다.`;show('complete');setTimeout(()=>popup(xp,'집중 완료! XP를 획득했어요'),80);await loadMySessions();await loadMyProfileCoins();if(currentGroup)loadLeaderboard();
+}
+function stopFocus(){if(confirm('지금 공부를 종료할까요?'))finish(false)}
+document.addEventListener('visibilitychange',()=>{if(timerState.active&&document.hidden){timerState.exits++;}else if(timerState.active&&!document.hidden&&timerState.exits){document.getElementById('warning').classList.remove('hidden');toast('집중 모드로 돌아왔어요')}updateTimer()})
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function renderUser(){if(profile)document.getElementById('greet').innerHTML=`안녕하세요, ${esc(profile.nickname)}님!<br>오늘도 집중해볼까요?`}
+
+async function handleInviteLink(){
+  const code=new URLSearchParams(location.search).get('join');
+  if(code) sessionStorage.setItem('pendingGroupCode',code.toUpperCase().slice(0,6));
+}
+async function joinPendingInvite(){
+  const code=sessionStorage.getItem('pendingGroupCode');
+  if(!code || !currentUser)return;
+  const {data,error}=await sb.rpc('join_group',{p_code:code});
+  sessionStorage.removeItem('pendingGroupCode');
+  if(error){toast(error.message);return;}
+  await loadGroups();
+  openGroup(data);
+  toast('초대 링크로 그룹에 참가했어요!');
+}
+function getWeekRange(){
+  const now=new Date(), day=now.getDay()||7;
+  const mon=new Date(now);mon.setHours(0,0,0,0);mon.setDate(now.getDate()-day+1);
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  const f=d=>`${d.getMonth()+1}/${d.getDate()}`;
+  return {label:`${f(mon)} ~ ${f(sun)}`};
+}
+function makeInviteUrl(code){
+  const u=new URL(location.href);u.searchParams.set('join',code);return u.toString();
+}
+async function shareInvite(){
+  const url=makeInviteUrl(currentGroup.code);
+  const text=`Focus Study 그룹 "${currentGroup.name}"에 참가해요!\n초대 코드: ${currentGroup.code}`;
+  if(navigator.share){
+    try{await navigator.share({title:`${currentGroup.name} 스터디 초대`,text,url});}catch(e){}
+  }else{
+    if(navigator.clipboard) await navigator.clipboard.writeText(url);
+    toast('초대 링크를 복사했어요.');
+  }
+}
+
+(async function init(){
+ if(!CONFIGURED){document.getElementById('configNotice').innerHTML='사용 전 <b>focus_study_v6_setup.sql</b>로 클라우드 DB를 만든 뒤, 이 파일 위쪽의 Supabase URL/키만 넣으면 됩니다.';return}
+ const {data}=await sb.auth.getSession();if(data.session)await afterLogin(data.session.user);
+ sb.auth.onAuthStateChange(async (event,session)=>{if(session && !currentUser)await afterLogin(session);});
+setInterval(()=>{if(currentGroup && document.getElementById('groupDetail').classList.contains('active'))loadLeaderboard()},20000);
+})();
+</script>
+</body>
+</html>
